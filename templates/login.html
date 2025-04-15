@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="auth-container">
+    <h1>Login</h1>
+    <form action="{{ url_for('login_auth') }}" method="POST" enctype="application/x-www-form-urlencoded">
+        <div class="form-group">
+            <label for="user_type">User Type:</label>
+            <select name="user_type" id="user_type" required>
+                <option value="customer">Customer</option>
+                <option value="staff">Airline Staff</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="username">Username/Email:</label>
+            <input type="text" name="username" id="username" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" name="password" id="password" required>
+        </div>
+
+        <div class="form-group">
+            <button type="submit">Login</button>
+        </div>
+    </form>
+
+    <p class="register-link">Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+</div>
+{% endblock %}

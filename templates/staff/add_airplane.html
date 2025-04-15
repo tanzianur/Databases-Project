@@ -1,0 +1,28 @@
+{% extends "base.html" %} {% block content %}
+<h1>Add New Airplane</h1>
+
+<form method="POST" action="{{ url_for('add_airplane') }}">
+  <div>
+    <label>Airplane ID:</label>
+    <input type="number" name="airplane_id" required />
+  </div>
+
+  <div>
+    <label>Number of Seats:</label>
+    <input type="number" name="num_seats" required />
+  </div>
+
+  <div>
+    <label>Manufacturing Company:</label>
+    <input type="text" name="manufacturing_company" required />
+  </div>
+
+  <input type="submit" value="Add Airplane" class="button" />
+</form>
+
+<div class="actions">
+  <a href="{{ url_for('staff_view_flights') }}" class="button"
+    >Back to Flights</a
+  >
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %} 
+
+{% block content %}
+<div class="home-container">
+    <h1>Welcome to Airline Reservation System</h1>
+    
+    <!-- Flight Search Form -->
+    <div class="search-container">
+        <h2>Search Flights</h2>
+        <form action="{{ url_for('search_flights') }}" method="POST" class="search-form">
+            <div class="form-group">
+                <label for="source">Source Airport:</label>
+                <input type="text" name="source" id="source" required placeholder="e.g. JFK">
+            </div>
+            
+            <div class="form-group">
+                <label for="destination">Destination Airport:</label>
+                <input type="text" name="destination" id="destination" required placeholder="e.g. LAX">
+            </div>
+            
+            <div class="form-group">
+                <label for="departure_date">Departure Date:</label>
+                <input type="date" name="departure_date" id="departure_date" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="trip_type">Trip Type:</label>
+                <select name="trip_type" id="trip_type" onchange="toggleReturnDate()">
+                    <option value="one_way">One Way</option>
+                    <option value="round_trip">Round Trip</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="return_date_group" style="display: none;">
+                <label for="return_date">Return Date:</label>
+                <input type="date" name="return_date" id="return_date">
+            </div>
+            
+            <button type="submit" class="search-button">Search Flights</button>
+        </form>
+    </div>
+
+    <div class="welcome-message">
+        <h2>Book your flight</h2>
+        <p>Please login or register to continue</p>
+    </div>
+
+    <div class="auth-buttons">
+        <a href="{{ url_for('login') }}" class="auth-button login-button">Login</a>
+        <a href="{{ url_for('register') }}" class="auth-button register-button">Register</a>
+    </div>
+</div>
+
+<script>
+function toggleReturnDate() {
+    const tripType = document.getElementById('trip_type').value;
+    const returnDateGroup = document.getElementById('return_date_group');
+    const returnDateInput = document.getElementById('return_date');
+    
+    if (tripType === 'round_trip') {
+        returnDateGroup.style.display = 'block';
+        returnDateInput.required = true;
+    } else {
+        returnDateGroup.style.display = 'none';
+        returnDateInput.required = false;
+    }
+}
+</script>
+{% endblock %}
