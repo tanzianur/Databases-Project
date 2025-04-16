@@ -5,7 +5,7 @@ import datetime
 
 #Initialize the app from Flask
 app = Flask(__name__)
-app.secret_key = 'my-secret_key'  # Replace with a strong secret key
+app.secret_key = 'my-secret_key'
 
 #Configure MySQL
 conn = pymysql.connect(host='localhost',
@@ -60,7 +60,7 @@ def register_customer_auth():
         data = cursor.fetchone()
 
         if data:
-            flash('This email is already registered')
+            flash('This email is already registered', 'error')
             return redirect(url_for('register_customer'))
 
         # Insert new customer
@@ -69,10 +69,10 @@ def register_customer_auth():
                              state, phone_number, passport_number, passport_expiration,
                              passport_country, date_of_birth))
         conn.commit()
-        flash('Registration successful! Please login')
+        flash('Registration successful! Please login', 'success')
         return redirect(url_for('login'))
     except Exception as e:
-        flash('An error occurred during registration')
+        flash('An error occurred during registration', 'error')
         return redirect(url_for('register_customer'))
     finally:
         cursor.close()
@@ -97,7 +97,7 @@ def register_staff_auth():
         airline_data = cursor.fetchone()
         
         if not airline_data:
-            flash('This airline does not exist in our system')
+            flash('This airline does not exist in our system', 'error')
             return redirect(url_for('register_staff'))
 
         # Check if staff already exists
@@ -106,7 +106,7 @@ def register_staff_auth():
         data = cursor.fetchone()
 
         if data:
-            flash('This username is already taken')
+            flash('This username is already taken', 'error')
             return redirect(url_for('register_staff'))
 
         # Insert new staff member
@@ -125,10 +125,10 @@ def register_staff_auth():
             cursor.execute(email_ins, (username, email))
         
         conn.commit()
-        flash('Staff registration successful! Please login')
+        flash('Staff registration successful! Please login', 'success')
         return redirect(url_for('login'))
     except Exception as e:
-        flash('An error occurred during registration')
+        flash('An error occurred during registration', 'error')
         return redirect(url_for('register_staff'))
     finally:
         cursor.close()
@@ -163,7 +163,7 @@ def login_auth():
             user_exists = cursor.fetchone()
             
             if not user_exists:
-                flash('No customer account found with this email')
+                flash('No customer account found with this email', 'error')
                 return redirect(url_for('login'))
             
             # Try password match with MD5 hashing
@@ -172,7 +172,7 @@ def login_auth():
             data = cursor.fetchone()
             
             if not data:
-                flash('Incorrect password')
+                flash('Incorrect password', 'error')
                 return redirect(url_for('login'))
         else:
             # Check if the username exists first
@@ -181,7 +181,7 @@ def login_auth():
             user_exists = cursor.fetchone()
             
             if not user_exists:
-                flash('No staff account found with this username')
+                flash('No staff account found with this username', 'error')
                 return redirect(url_for('login'))
             
             # Try password match with MD5 hashing
@@ -190,7 +190,7 @@ def login_auth():
             data = cursor.fetchone()
             
             if not data:
-                flash('Incorrect password')
+                flash('Incorrect password', 'error')
                 return redirect(url_for('login'))
 
         # If we get here, login was successful
@@ -199,12 +199,15 @@ def login_auth():
         if user_type == 'customer':
             session['name'] = data['name']
         else:
+            session['first_name'] = data['first_name']
+            session['last_name'] = data['last_name']
             session['airline_name'] = data['airline_name']
             
+        flash('Login successful!', 'success')
         return redirect(url_for('dashboard'))
             
     except Exception as e:
-        flash('An error occurred during login. Please try again.')
+        flash('An error occurred during login. Please try again.', 'error')
         return redirect(url_for('login'))
     finally:
         cursor.close()
@@ -280,6 +283,41 @@ def search_flights():
                          outbound_flights=outbound_flights,
                          return_flights=return_flights,
                          trip_type=trip_type)
+
+@app.route('/add_airplane', methods=['GET', 'POST'])
+def add_airplane():
+    if 'username' not in session or session['user_type'] != 'staff':
+        flash('You must be logged in as airline staff to access this page')
+        return redirect(url_for('login'))
+        
+    if request.method == 'POST':
+        airline_name = session.get('airline_name')
+        airplane_id = request.form['airplane_id']
+        seats = request.form['seats']
+        
+        cursor = conn.cursor()
+        try:
+            # Check if airplane already exists
+            query = 'SELECT * FROM airplane WHERE airline_name = %s AND airplane_id = %s'
+            cursor.execute(query, (airline_name, airplane_id))
+            if cursor.fetchone():
+                flash('An airplane with this ID already exists')
+                return redirect(url_for('add_airplane'))
+                
+            # Add new airplane
+            query = 'INSERT INTO airplane VALUES(%s, %s, %s)'
+            cursor.execute(query, (airline_name, airplane_id, seats))
+            conn.commit()
+            flash('Airplane added successfully')
+            return redirect(url_for('dashboard'))
+            
+        except Exception as e:
+            flash('Error adding airplane')
+            return redirect(url_for('add_airplane'))
+        finally:
+            cursor.close()
+            
+    return render_template('add_airplane.html')
 
 #Run the app on localhost port 5000
 #debug = True -> you don't have to restart flask

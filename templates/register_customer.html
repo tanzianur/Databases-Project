@@ -2,59 +2,81 @@
 {% block content %}
 <div class="auth-container">
     <h1>Customer Registration</h1>
+    
     <form action="{{ url_for('register_customer_auth') }}" method="POST">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
         <div class="form-group">
             <label for="email">Email:</label>
             <input type="email" name="email" id="email" required>
         </div>
+
         <div class="form-group">
             <label for="name">Full Name:</label>
             <input type="text" name="name" id="name" required>
         </div>
+
         <div class="form-group">
             <label for="password">Password:</label>
             <input type="password" name="password" id="password" required>
         </div>
+
         <div class="form-group">
             <label for="building_number">Building Number:</label>
-            <input type="text" name="building_number" id="building_number">
+            <input type="text" name="building_number" id="building_number" required>
         </div>
+
         <div class="form-group">
             <label for="street">Street:</label>
-            <input type="text" name="street" id="street">
+            <input type="text" name="street" id="street" required>
         </div>
+
         <div class="form-group">
             <label for="city">City:</label>
-            <input type="text" name="city" id="city">
+            <input type="text" name="city" id="city" required>
         </div>
+
         <div class="form-group">
             <label for="state">State:</label>
-            <input type="text" name="state" id="state">
+            <input type="text" name="state" id="state" required>
         </div>
+
         <div class="form-group">
             <label for="phone_number">Phone Number:</label>
-            <input type="text" name="phone_number" id="phone_number">
+            <input type="text" name="phone_number" id="phone_number" required>
         </div>
+
         <div class="form-group">
             <label for="passport_number">Passport Number:</label>
-            <input type="text" name="passport_number" id="passport_number">
+            <input type="text" name="passport_number" id="passport_number" required>
         </div>
+
         <div class="form-group">
             <label for="passport_expiration">Passport Expiration:</label>
-            <input type="date" name="passport_expiration" id="passport_expiration">
+            <input type="date" name="passport_expiration" id="passport_expiration" required>
         </div>
+
         <div class="form-group">
             <label for="passport_country">Passport Country:</label>
-            <input type="text" name="passport_country" id="passport_country">
+            <input type="text" name="passport_country" id="passport_country" required>
         </div>
+
         <div class="form-group">
             <label for="date_of_birth">Date of Birth:</label>
             <input type="date" name="date_of_birth" id="date_of_birth" required>
         </div>
+
         <div class="form-group">
             <button type="submit">Register</button>
         </div>
     </form>
+
     <p class="register-link">Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
 </div>
 {% endblock %} 
