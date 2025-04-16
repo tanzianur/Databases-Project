@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="auth-container">
+    <h1>Airline Staff Registration</h1>
+    <form action="{{ url_for('register_staff_auth') }}" method="POST">
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" name="username" id="username" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" name="password" id="password" required>
+        </div>
+        <div class="form-group">
+            <label for="first_name">First Name:</label>
+            <input type="text" name="first_name" id="first_name" required>
+        </div>
+        <div class="form-group">
+            <label for="last_name">Last Name:</label>
+            <input type="text" name="last_name" id="last_name" required>
+        </div>
+        <div class="form-group">
+            <label for="date_of_birth">Date of Birth:</label>
+            <input type="date" name="date_of_birth" id="date_of_birth" required>
+        </div>
+        <div class="form-group">
+            <label for="airline_name">Airline Name:</label>
+            <select name="airline_name" id="airline_name" required>
+                <option value="">Select Airline</option>
+                <option value="Jet Blue">Jet Blue</option>
+                <option value="China Eastern">China Eastern</option>
+                <option value="Delta Airlines">Delta Airlines</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="phone_number">Phone Number:</label>
+            <input type="text" name="phone_numbers" id="phone_number" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" name="emails" id="email" required>
+        </div>
+        <div class="form-group">
+            <button type="submit">Register</button>
+        </div>
+    </form>
+    <p class="register-link">Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+</div>
+{% endblock %} 

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="dashboard-container">
+    <h1>Welcome, {{ session['username'] }}</h1>
+    
+    <div class="dashboard-section">
+        <h2>Airline Staff Dashboard</h2>
+        <div class="action-buttons">
+            <a href="{{ url_for('add_airplane') }}" class="dashboard-button">Add Airplane</a>
+            <a href="{{ url_for('add_airport') }}" class="dashboard-button">Add Airport</a>
+            <a href="#" class="dashboard-button">View Flights</a>
+        </div>
+    </div>
+
+    <div class="dashboard-section">
+        <h2>Flight Management</h2>
+        <!-- Flight management content will go here -->
+    </div>
+</div>
+
+<style>
+.dashboard-container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+}
+
+.dashboard-section {
+    background-color: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.dashboard-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.dashboard-button:hover {
+    background-color: #0056b3;
+}
+</style>
+{% endblock %}
