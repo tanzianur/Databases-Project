@@ -1,7 +1,6 @@
 #Import Flask Library
 from flask import Flask, render_template, request, session, url_for, redirect, flash
 import pymysql.cursors
-from functools import wraps
 import datetime
 
 #Initialize the app from Flask
@@ -150,49 +149,66 @@ def dashboard():
 
 @app.route('/login_auth', methods=['GET','POST'])
 def login_auth():
-    username = request.form['username']
-    password = request.form['password']
+    username = request.form['username'].strip()
+    password = request.form['password'].strip()
     user_type = request.form['user_type']
-    print(f"Login attempt - username: {username}, user_type: {user_type}")  # Debug print
 
     cursor = conn.cursor()
 
-    if user_type == 'customer':
-        query = 'SELECT * FROM customer WHERE email = %s AND password = %s'
-        cursor.execute(query, (username, password))
-        print("Trying direct password match")  # Debug print
-        data = cursor.fetchone()
-        
-        if not data:
+    try:
+        if user_type == 'customer':
+            # Check if the email exists first
+            check_query = 'SELECT * FROM customer WHERE email = %s'
+            cursor.execute(check_query, (username,))
+            user_exists = cursor.fetchone()
+            
+            if not user_exists:
+                flash('No customer account found with this email')
+                return redirect(url_for('login'))
+            
+            # Try password match with MD5 hashing
             query = 'SELECT * FROM customer WHERE email = %s AND password = md5(%s)'
             cursor.execute(query, (username, password))
-            print("Trying md5 password match")  # Debug print
             data = cursor.fetchone()
-    else:
-        query = 'SELECT * FROM airline_staff WHERE username = %s AND password = %s'
-        cursor.execute(query, (username, password))
-        print("Trying direct password match")  # Debug print
-        data = cursor.fetchone()
-        
-        if not data:
+            
+            if not data:
+                flash('Incorrect password')
+                return redirect(url_for('login'))
+        else:
+            # Check if the username exists first
+            check_query = 'SELECT * FROM airline_staff WHERE username = %s'
+            cursor.execute(check_query, (username,))
+            user_exists = cursor.fetchone()
+            
+            if not user_exists:
+                flash('No staff account found with this username')
+                return redirect(url_for('login'))
+            
+            # Try password match with MD5 hashing
             query = 'SELECT * FROM airline_staff WHERE username = %s AND password = md5(%s)'
             cursor.execute(query, (username, password))
-            print("Trying md5 password match")  # Debug print
             data = cursor.fetchone()
+            
+            if not data:
+                flash('Incorrect password')
+                return redirect(url_for('login'))
 
-    print(f"Query result: {data}")  # Debug print
-    cursor.close()
-
-    if data:
+        # If we get here, login was successful
         session['username'] = username
         session['user_type'] = user_type
-        print("Login successful, redirecting to dashboard")  # Debug print
+        if user_type == 'customer':
+            session['name'] = data['name']
+        else:
+            session['airline_name'] = data['airline_name']
+            
         return redirect(url_for('dashboard'))
-    else:
-        flash('Invalid login credentials')
-        print("Login failed, redirecting to login page")  # Debug print
+            
+    except Exception as e:
+        flash('An error occurred during login. Please try again.')
         return redirect(url_for('login'))
-    
+    finally:
+        cursor.close()
+
 @app.route('/search_flights', methods=['POST'])
 def search_flights():
     source = request.form['source']

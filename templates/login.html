@@ -2,7 +2,16 @@
 {% block content %}
 <div class="auth-container">
     <h1>Login</h1>
-    <form action="{{ url_for('login_auth') }}" method="POST" enctype="application/x-www-form-urlencoded">
+    
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="flash-message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <form action="{{ url_for('login_auth') }}" method="POST">
         <div class="form-group">
             <label for="user_type">User Type:</label>
             <select name="user_type" id="user_type" required>
