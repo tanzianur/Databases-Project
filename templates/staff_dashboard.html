@@ -5,22 +5,9 @@
     
     <div class="dashboard-section">
         <h2>Flight Management - {{ session['airline_name'] }}</h2>
-        <div class="stats-grid">
-            <div class="stat-item">
-                <h3>Today's Flights</h3>
-                <p>View and manage today's flights</p>
-                <a href="{{ url_for('staff_view_flights', start_date=today, end_date=today) }}" class="stat-link">View Today's Flights</a>
-            </div>
-            <div class="stat-item">
-                <h3>Next 30 Days</h3>
-                <p>View upcoming flights for the next month</p>
-                <a href="{{ url_for('staff_view_flights') }}" class="stat-link">View Upcoming Flights</a>
-            </div>
-            <div class="stat-item">
-                <h3>Custom Search</h3>
-                <p>Search flights by date range and airports</p>
-                <a href="{{ url_for('staff_view_flights') }}" class="stat-link">Advanced Search</a>
-            </div>
+        <div class="flight-management">
+            <a href="{{ url_for('staff_view_flights') }}" class="action-button">View All Flights</a>
+            <a href="{{ url_for('add_airplane') }}" class="action-button">Add New Airplane</a>
         </div>
     </div>
 </div>
@@ -34,54 +21,41 @@
 
 .dashboard-section {
     background-color: white;
-    padding: 20px;
+    padding: 30px;
     margin-bottom: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+.flight-management {
+    display: flex;
     gap: 20px;
     margin-top: 20px;
 }
 
-.stat-item {
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
-    text-align: center;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.stat-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.stat-item h3 {
-    margin: 0 0 10px 0;
-    color: #333;
-}
-
-.stat-item p {
-    margin: 0 0 15px 0;
-    color: #666;
-}
-
-.stat-link {
+.action-button {
     display: inline-block;
-    padding: 8px 16px;
-    background-color: #007bff;
+    padding: 12px 24px;
+    background-color: #2196F3;
     color: white;
     text-decoration: none;
     border-radius: 4px;
-    transition: background-color 0.3s;
+    font-weight: bold;
+    transition: opacity 0.3s;
 }
 
-.stat-link:hover {
-    background-color: #0056b3;
+.action-button:hover {
+    opacity: 0.9;
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 30px;
+}
+
+h2 {
+    color: #444;
+    margin-bottom: 20px;
 }
 </style>
 {% endblock %}

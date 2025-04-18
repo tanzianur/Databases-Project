@@ -1,24 +1,35 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="dashboard-container">
-    <h1>Flight Management - {{ session['airline_name'] }}</h1>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1>Flight Management - {{ session['airline_name'] }}</h1>
+        <a href="{{ url_for('dashboard') }}" 
+           style="display: inline-block;
+                  padding: 8px 20px;
+                  background-color: #2196F3;
+                  color: white;
+                  text-decoration: none;
+                  border-radius: 4px;
+                  font-weight: bold;">
+            Return to Dashboard
+        </a>
+    </div>
 
     <!-- Filter Form -->
     <div class="filter-section">
-        <h2>Filter Flights</h2>
         <form method="POST" class="filter-form">
             <div class="form-group">
-                <label for="start_date">Start Date:</label>
+                <label for="start_date">From Date:</label>
                 <input type="date" id="start_date" name="start_date" value="{{ start_date }}" required>
             </div>
 
             <div class="form-group">
-                <label for="end_date">End Date:</label>
+                <label for="end_date">To Date:</label>
                 <input type="date" id="end_date" name="end_date" value="{{ end_date }}" required>
             </div>
 
             <div class="form-group">
-                <label for="source_airport">From:</label>
+                <label for="source_airport">From Airport:</label>
                 <select name="source_airport" id="source_airport">
                     <option value="">All Airports</option>
                     {% for airport in airports %}
@@ -30,7 +41,7 @@
             </div>
 
             <div class="form-group">
-                <label for="destination_airport">To:</label>
+                <label for="destination_airport">To Airport:</label>
                 <select name="destination_airport" id="destination_airport">
                     <option value="">All Airports</option>
                     {% for airport in airports %}
@@ -41,7 +52,10 @@
                 </select>
             </div>
 
-            <button type="submit" class="filter-button">Apply Filters</button>
+            <div class="form-group button-group">
+                <button type="submit" class="filter-button">Search Flights</button>
+                <a href="{{ url_for('staff_view_flights') }}" class="reset-button">Reset Search</a>
+            </div>
         </form>
     </div>
 
@@ -114,6 +128,12 @@
     margin-bottom: 15px;
 }
 
+.button-group {
+    display: flex;
+    gap: 10px;
+    grid-column: 1 / -1;
+}
+
 .form-group label {
     display: block;
     margin-bottom: 5px;
@@ -137,8 +157,18 @@
     cursor: pointer;
 }
 
-.filter-button:hover {
-    background-color: #0056b3;
+.reset-button {
+    background-color: #6c757d;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    text-align: center;
+}
+
+.filter-button:hover, .reset-button:hover {
+    opacity: 0.9;
 }
 
 .flights-table {

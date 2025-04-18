@@ -7,7 +7,7 @@
     <!-- Flight Search Form -->
     <div class="search-container">
         <h2>Search Flights</h2>
-        <form action="{{ url_for('search_flights') }}" method="POST" class="search-form">
+        <form action="/search_flights" method="POST" class="search-form">
             <div class="form-group">
                 <label for="source">From:</label>
                 <input type="text" name="source" id="source" required placeholder="Enter airport code (e.g. JFK)">
@@ -40,14 +40,11 @@
         </form>
     </div>
 
+    {% if 'username' not in session %}
     <div class="welcome-message">
         <h2>Book your flight</h2>
         <p>Please login or register to continue</p>
     </div>
-
-    <div class="auth-buttons">
-        <a href="{{ url_for('login') }}" class="auth-button login-button">Login</a>
-        <a href="{{ url_for('register') }}" class="auth-button register-button">Register</a>
-    </div>
+    {% endif %}
 </div>
 {% endblock %}

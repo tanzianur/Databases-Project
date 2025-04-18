@@ -123,7 +123,7 @@
         .register-link a:hover {
             text-decoration: underline;
         }
-        /* New styles for dynamic fields */
+       
         .phone-number-group, .email-group {
             display: flex;
             gap: 10px;
@@ -162,21 +162,53 @@
         }
         .nav-bar {
             background-color: #333;
-            overflow: hidden;
-            padding: 10px;
+            padding: 15px 30px;
+            margin: -20px -20px 20px -20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .nav-bar a {
-            color: white;
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 4px;
             text-decoration: none;
-            padding: 8px 16px;
-            margin-right: 10px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .nav-home {
+            background-color: #2196F3;
+            color: white;
+        }
+        .nav-dashboard {
+            background-color: #4CAF50;
+            color: white;
+            margin-right: 15px;
+        }
+        .nav-login {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .nav-register {
+            background-color: #2196F3;
+            color: white;
+        }
+        .nav-logout {
+            background-color: #f44336;
+            color: white;
         }
         .nav-bar a:hover {
-            background-color: #ddd;
-            color: black;
+            opacity: 0.9;
         }
-        .nav-bar .right {
-            float: right;
+        .nav-left {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        .nav-right {
+            display: flex;
+            gap: 20px;
+            align-items: center;
         }
         .flash-message {
             padding: 10px;
@@ -195,26 +227,18 @@
 </head>
 <body>
     <div class="nav-bar">
-        <a href="{{ url_for('home') }}">Home</a>
-        {% if 'username' not in session %}
-            <div class="right">
-                <a href="{{ url_for('login') }}">Login</a>
-                <a href="{{ url_for('register') }}">Register</a>
-            </div>
-        {% else %}
-            <a href="{{ url_for('dashboard') }}">Dashboard</a>
-            <div class="right">
-                <span style="color: white; margin-right: 15px;">
-                    Welcome, 
-                    {% if session['user_type'] == 'customer' %}
-                        {{ session['name'] }}
-                    {% else %}
-                        {{ session.get('first_name', '') }} {{ session.get('last_name', '') }}
-                    {% endif %}
-                </span>
-                <a href="{{ url_for('logout') }}">Logout</a>
-            </div>
-        {% endif %}
+        <div class="nav-left">
+            <a href="/" class="nav-home">Home</a>
+        </div>
+        <div class="nav-right">
+            {% if 'username' in session %}
+                <a href="{{ url_for('dashboard') }}" class="nav-dashboard">Dashboard</a>
+                <a href="{{ url_for('logout') }}" class="nav-logout">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="nav-login">Login</a>
+                <a href="{{ url_for('register') }}" class="nav-register">Register</a>
+            {% endif %}
+        </div>
     </div>
 
     {% block content %}{% endblock %}

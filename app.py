@@ -23,6 +23,14 @@ def home():
 def login():
     return render_template('login.html')
 
+@app.route('/login/customer')
+def login_customer():
+    return render_template('login_customer.html')
+
+@app.route('/login/staff')
+def login_staff():
+    return render_template('login_staff.html')
+
 #Define route for register
 @app.route('/register')
 def register():
@@ -147,68 +155,83 @@ def dashboard():
     else:
         return render_template('staff_dashboard.html')
 
-@app.route('/login_auth', methods=['GET','POST'])
-def login_auth():
-    username = request.form['username'].strip()
-    password = request.form['password'].strip()
-    user_type = request.form['user_type']
+@app.route('/login/customer/auth', methods=['POST'])
+def login_customer_auth():
+    email = request.form['email']
+    password = request.form['password']
 
     cursor = conn.cursor()
-
     try:
-        if user_type == 'customer':
-            # Check if the email exists first
-            check_query = 'SELECT * FROM customer WHERE email = %s'
-            cursor.execute(check_query, (username,))
-            user_exists = cursor.fetchone()
-            
-            if not user_exists:
-                flash('No customer account found with this email', 'error')
-                return redirect(url_for('login'))
-            
-            # Try password match with MD5 hashing
-            query = 'SELECT * FROM customer WHERE email = %s AND password = md5(%s)'
-            cursor.execute(query, (username, password))
-            data = cursor.fetchone()
-            
-            if not data:
-                flash('Incorrect password', 'error')
-                return redirect(url_for('login'))
-        else:
-            # Check if the username exists first
-            check_query = 'SELECT * FROM airline_staff WHERE username = %s'
-            cursor.execute(check_query, (username,))
-            user_exists = cursor.fetchone()
-            
-            if not user_exists:
-                flash('No staff account found with this username', 'error')
-                return redirect(url_for('login'))
-            
-            # Try password match with MD5 hashing
-            query = 'SELECT * FROM airline_staff WHERE username = %s AND password = md5(%s)'
-            cursor.execute(query, (username, password))
-            data = cursor.fetchone()
-            
-            if not data:
-                flash('Incorrect password', 'error')
-                return redirect(url_for('login'))
+        # Check if the email exists first
+        check_query = 'SELECT * FROM customer WHERE email = %s'
+        cursor.execute(check_query, (email,))
+        user_exists = cursor.fetchone()
+        
+        if not user_exists:
+            flash('No customer account found with this email', 'error')
+            return redirect(url_for('login_customer'))
+        
+        # Try password match with MD5 hashing
+        query = 'SELECT * FROM customer WHERE email = %s AND password = md5(%s)'
+        cursor.execute(query, (email, password))
+        data = cursor.fetchone()
+        
+        if not data:
+            flash('Incorrect password', 'error')
+            return redirect(url_for('login_customer'))
 
         # If we get here, login was successful
-        session['username'] = username
-        session['user_type'] = user_type
-        if user_type == 'customer':
-            session['name'] = data['name']
-        else:
-            session['first_name'] = data['first_name']
-            session['last_name'] = data['last_name']
-            session['airline_name'] = data['airline_name']
-            
+        session['username'] = email
+        session['user_type'] = 'customer'
+        session['name'] = data['name']
+        
         flash('Login successful!', 'success')
         return redirect(url_for('dashboard'))
             
     except Exception as e:
         flash('An error occurred during login. Please try again.', 'error')
-        return redirect(url_for('login'))
+        return redirect(url_for('login_customer'))
+    finally:
+        cursor.close()
+
+@app.route('/login/staff/auth', methods=['POST'])
+def login_staff_auth():
+    username = request.form['username']
+    password = request.form['password']
+
+    cursor = conn.cursor()
+    try:
+        # Check if the username exists first
+        check_query = 'SELECT * FROM airline_staff WHERE username = %s'
+        cursor.execute(check_query, (username,))
+        user_exists = cursor.fetchone()
+        
+        if not user_exists:
+            flash('No staff account found with this username', 'error')
+            return redirect(url_for('login_staff'))
+        
+        # Try password match with MD5 hashing
+        query = 'SELECT * FROM airline_staff WHERE username = %s AND password = md5(%s)'
+        cursor.execute(query, (username, password))
+        data = cursor.fetchone()
+        
+        if not data:
+            flash('Incorrect password', 'error')
+            return redirect(url_for('login_staff'))
+
+        # If we get here, login was successful
+        session['username'] = username
+        session['user_type'] = 'staff'
+        session['first_name'] = data['first_name']
+        session['last_name'] = data['last_name']
+        session['airline_name'] = data['airline_name']
+        
+        flash('Login successful!', 'success')
+        return redirect(url_for('dashboard'))
+            
+    except Exception as e:
+        flash('An error occurred during login. Please try again.', 'error')
+        return redirect(url_for('login_staff'))
     finally:
         cursor.close()
 
@@ -328,18 +351,27 @@ def staff_view_flights():
     cursor = conn.cursor()
     airline_name = session['airline_name']
     
-    # Default: next 30 days
-    start_date = datetime.datetime.now().strftime('%Y-%m-%d')
-    end_date = (datetime.datetime.now() + datetime.timedelta(days=30)).strftime('%Y-%m-%d')
-    source_airport = ''
-    destination_airport = ''
+    # Get current date and default end date (30 days from now)
+    today = datetime.datetime.now().date()
+    default_end_date = today + datetime.timedelta(days=30)
     
-    # Handle filters if POST request
+    # Set default dates or get from form
     if request.method == 'POST':
-        start_date = request.form.get('start_date', start_date)
-        end_date = request.form.get('end_date', end_date)
-        source_airport = request.form.get('source_airport', '')
-        destination_airport = request.form.get('destination_airport', '')
+        try:
+            start_date = datetime.datetime.strptime(request.form.get('start_date'), '%Y-%m-%d').date()
+            end_date = datetime.datetime.strptime(request.form.get('end_date'), '%Y-%m-%d').date()
+        except (ValueError, TypeError):
+            # If dates are invalid, use defaults
+            start_date = today
+            end_date = default_end_date
+    else:
+        # For GET requests, show next 30 days by default
+        start_date = today
+        end_date = default_end_date
+    
+    # Get airport filters from form or set to empty
+    source_airport = request.form.get('source_airport', '') if request.method == 'POST' else ''
+    destination_airport = request.form.get('destination_airport', '') if request.method == 'POST' else ''
     
     # Base query
     query = '''
@@ -367,15 +399,20 @@ def staff_view_flights():
     flights = cursor.fetchall()
     
     # Get all airports for the filter dropdowns
-    cursor.execute('SELECT DISTINCT code, city FROM airport')
+    cursor.execute('SELECT DISTINCT code, city FROM airport ORDER BY code')
     airports = cursor.fetchall()
     
     cursor.close()
+    
+    # Format dates for the form
+    start_date_str = start_date.strftime('%Y-%m-%d')
+    end_date_str = end_date.strftime('%Y-%m-%d')
+    
     return render_template('staff_view_flights.html', 
                          flights=flights, 
                          airports=airports,
-                         start_date=start_date,
-                         end_date=end_date,
+                         start_date=start_date_str,
+                         end_date=end_date_str,
                          source_airport=source_airport,
                          destination_airport=destination_airport)
 

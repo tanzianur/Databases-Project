@@ -1,7 +1,33 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="dashboard-container">
-    <h1>Flight {{ flight.flight_number }} - Customers</h1>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1>Flight {{ flight.flight_number }} - Customers</h1>
+        <div style="display: flex; gap: 10px;">
+            <a href="{{ url_for('staff_view_flights') }}" 
+               style="display: inline-block;
+                      padding: 8px 20px;
+                      background-color: #4CAF50;
+                      color: white;
+                      text-decoration: none;
+                      border-radius: 4px;
+                      font-weight: bold;
+                      transition: background-color 0.3s;">
+                Back to Flights
+            </a>
+            <a href="{{ url_for('dashboard') }}" 
+               style="display: inline-block;
+                      padding: 8px 20px;
+                      background-color: #2196F3;
+                      color: white;
+                      text-decoration: none;
+                      border-radius: 4px;
+                      font-weight: bold;
+                      transition: background-color 0.3s;">
+                Return to Dashboard
+            </a>
+        </div>
+    </div>
     
     <!-- Flight Details -->
     <div class="flight-details">
@@ -62,10 +88,6 @@
             <p>No customers found for this flight.</p>
         {% endif %}
     </div>
-
-    <div class="actions">
-        <a href="{{ url_for('staff_view_flights') }}" class="back-button">Back to Flights</a>
-    </div>
 </div>
 
 <style>
@@ -123,20 +145,6 @@
 
 .customers-table tr:hover {
     background-color: #f5f5f5;
-}
-
-.back-button {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #6c757d;
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-    margin-top: 20px;
-}
-
-.back-button:hover {
-    background-color: #5a6268;
 }
 </style>
 {% endblock %} 
