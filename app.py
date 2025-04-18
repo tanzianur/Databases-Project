@@ -319,6 +319,99 @@ def add_airplane():
             
     return render_template('add_airplane.html')
 
+@app.route('/staff/view_flights', methods=['GET', 'POST'])
+def staff_view_flights():
+    if 'username' not in session or session['user_type'] != 'staff':
+        flash('Please login as airline staff', 'error')
+        return redirect(url_for('login'))
+
+    cursor = conn.cursor()
+    airline_name = session['airline_name']
+    
+    # Default: next 30 days
+    start_date = datetime.datetime.now().strftime('%Y-%m-%d')
+    end_date = (datetime.datetime.now() + datetime.timedelta(days=30)).strftime('%Y-%m-%d')
+    source_airport = ''
+    destination_airport = ''
+    
+    # Handle filters if POST request
+    if request.method == 'POST':
+        start_date = request.form.get('start_date', start_date)
+        end_date = request.form.get('end_date', end_date)
+        source_airport = request.form.get('source_airport', '')
+        destination_airport = request.form.get('destination_airport', '')
+    
+    # Base query
+    query = '''
+        SELECT flight_number, departure_datetime, arrival_datetime, 
+               departure_airport_code, arrival_airport_code, status, 
+               airplane_ID, base_price
+        FROM flight 
+        WHERE airline_name = %s 
+        AND DATE(departure_datetime) BETWEEN %s AND %s
+    '''
+    params = [airline_name, start_date, end_date]
+    
+    # Add filters if provided
+    if source_airport:
+        query += ' AND departure_airport_code = %s'
+        params.append(source_airport)
+    if destination_airport:
+        query += ' AND arrival_airport_code = %s'
+        params.append(destination_airport)
+    
+    # Order by departure date
+    query += ' ORDER BY departure_datetime ASC'
+    
+    cursor.execute(query, tuple(params))
+    flights = cursor.fetchall()
+    
+    # Get all airports for the filter dropdowns
+    cursor.execute('SELECT DISTINCT code, city FROM airport')
+    airports = cursor.fetchall()
+    
+    cursor.close()
+    return render_template('staff_view_flights.html', 
+                         flights=flights, 
+                         airports=airports,
+                         start_date=start_date,
+                         end_date=end_date,
+                         source_airport=source_airport,
+                         destination_airport=destination_airport)
+
+@app.route('/staff/flight_customers/<flight_number>')
+def staff_flight_customers(flight_number):
+    if 'username' not in session or session['user_type'] != 'staff':
+        flash('Please login as airline staff', 'error')
+        return redirect(url_for('login'))
+
+    cursor = conn.cursor()
+    airline_name = session['airline_name']
+    
+    # Verify the flight belongs to the staff's airline
+    cursor.execute('SELECT * FROM flight WHERE airline_name = %s AND flight_number = %s', 
+                  (airline_name, flight_number))
+    flight = cursor.fetchone()
+    
+    if not flight:
+        flash('Flight not found or unauthorized', 'error')
+        return redirect(url_for('staff_view_flights'))
+    
+    # Get customers on this flight
+    query = '''
+        SELECT c.name, c.email, t.ticket_ID, t.sold_price
+        FROM ticket t
+        JOIN customer c ON t.email = c.email
+        WHERE t.flight_number = %s AND t.airline_name = %s
+    '''
+    cursor.execute(query, (flight_number, airline_name))
+    customers = cursor.fetchall()
+    
+    cursor.close()
+    return render_template('staff_flight_customers.html', 
+                         flight=flight, 
+                         customers=customers)
+
 #Run the app on localhost port 5000
 #debug = True -> you don't have to restart flask
 #for changes to go through, TURN OFF FOR PRODUCTION

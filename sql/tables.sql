@@ -156,16 +156,24 @@ CREATE TABLE `staff_phone` (
 
 CREATE TABLE `ticket` (
   `ticket_ID` int(11) NOT NULL,
-  `email` varchar(50) NOT NULL,
   `airline_name` varchar(50) NOT NULL,
   `flight_number` varchar(10) NOT NULL,
-  `departure_datetime` datetime NOT NULL,
-  `sold_price` decimal(10,2) NOT NULL,
-  `purchase_datetime` datetime NOT NULL,
+  `departure_datetime` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Table structure for table `purchase`
+--
+
+CREATE TABLE `purchase` (
+  `ticket_ID` int(11) NOT NULL,
+  `email` varchar(50) NOT NULL,
   `card_type` varchar(20) DEFAULT NULL,
   `card_number` varchar(20) DEFAULT NULL,
   `card_name` varchar(30) DEFAULT NULL,
-  `card_expiry` date DEFAULT NULL
+  `card_expiry` date DEFAULT NULL,
+  `purchase_datetime` datetime NOT NULL,
+  `sold_price` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -239,8 +247,14 @@ ALTER TABLE `staff_phone`
 --
 ALTER TABLE `ticket`
   ADD PRIMARY KEY (`ticket_ID`),
-  ADD KEY `email` (`email`),
   ADD KEY `airline_name` (`airline_name`,`flight_number`,`departure_datetime`);
+
+--
+-- Indexes for table `purchase`
+--
+ALTER TABLE `purchase`
+  ADD PRIMARY KEY (`ticket_ID`),
+  ADD KEY `email` (`email`);
 
 --
 -- Constraints for dumped tables
@@ -290,8 +304,14 @@ ALTER TABLE `staff_phone`
 -- Constraints for table `ticket`
 --
 ALTER TABLE `ticket`
-  ADD CONSTRAINT `ticket_ibfk_1` FOREIGN KEY (`email`) REFERENCES `customer` (`email`),
-  ADD CONSTRAINT `ticket_ibfk_2` FOREIGN KEY (`airline_name`,`flight_number`,`departure_datetime`) REFERENCES `flight` (`airline_name`, `flight_number`, `departure_datetime`);
+  ADD CONSTRAINT `ticket_ibfk_1` FOREIGN KEY (`airline_name`,`flight_number`,`departure_datetime`) REFERENCES `flight` (`airline_name`, `flight_number`, `departure_datetime`);
+
+--
+-- Constraints for table `purchase`
+--
+ALTER TABLE `purchase`
+  ADD CONSTRAINT `purchase_ibfk_1` FOREIGN KEY (`ticket_ID`) REFERENCES `ticket` (`ticket_ID`),
+  ADD CONSTRAINT `purchase_ibfk_2` FOREIGN KEY (`email`) REFERENCES `customer` (`email`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
